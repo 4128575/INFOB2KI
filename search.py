@@ -1,4 +1,4 @@
-# search.py
+﻿# search.py
 # ---------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
@@ -111,7 +111,7 @@ def depthFirstSearch(problem):
             openlist = [path[len(path)-2]] + openlist
             del path[-2:]
             continue
-        "We want to place the successors at the head of the openlist so that if the left most node leads to a deaden, it tries the next successor before travelling up the tree again."
+        "We want to place the successors at the head of the openlist so that if the left most node leads to a deadend, it tries the next successor before travelling up the tree again."
         openlist = successors + openlist
     actionlist = [node[1] for node in path[1:]]
     print actionlist
