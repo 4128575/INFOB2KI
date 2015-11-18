@@ -112,9 +112,9 @@ def depthFirstSearch(problem):
             del path[-2:]
             continue
         "We want to place the successors at the head of the openlist so that if the left most node leads to a deaden, it tries the next successor before travelling up the tree again."
-        openlist = successors + openlist
+        openlist = successors[::-1] + openlist
     actionlist = [node[1] for node in path[1:]]
-    print actionlist
+    print len(actionlist)
     return actionlist
 
 def breadthFirstSearch(problem):
