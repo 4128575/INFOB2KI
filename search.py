@@ -87,28 +87,6 @@ def depthFirstSearch(problem):
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
     """
     start = problem.getStartState()
-    print "Start:", start
-    print "Successors 1: ", problem.getSuccessors(start)
-    s1 = problem.getSuccessors(start)[0][0]
-    print "Successors 2: ", problem.isGoalState(s1), problem.getSuccessors(s1)
-    s2 = problem.getSuccessors(s1)[1][0]
-    print "Successors 3: ", problem.isGoalState(s2), problem.getSuccessors(s2)
-    s3 = problem.getSuccessors(s2)[1][0]
-    print "Successors 4: ", problem.isGoalState(s3), problem.getSuccessors(s3)
-    s4 = problem.getSuccessors(s3)[0][0]
-    print "Successors 5: ", problem.isGoalState(s4), problem.getSuccessors(s4)
-    s5 = problem.getSuccessors(s4)[1][0]
-    print "Successors 6: ", problem.isGoalState(s5), problem.getSuccessors(s5)
-    s6 = problem.getSuccessors(s5)[1][0]
-    print "Successors 7: ", problem.isGoalState(s6), problem.getSuccessors(s6)
-    s7 = problem.getSuccessors(s6)[1][0]
-    print "Successors 8: ", problem.isGoalState(s7), problem.getSuccessors(s7)
-    s8 = problem.getSuccessors(s7)[1][0]
-    print "Successors 9: ", problem.isGoalState(s8), problem.getSuccessors(s8)
-
-    s9 = problem.getSuccessors(s6)[0][0]
-    print "Successors 11: ", problem.isGoalState(s9), problem.getSuccessors(s9)
-    
     "list of nodes seen."
     openlist = []
     "list of nodes iterated. (Maybe we don't need this)"
@@ -123,26 +101,20 @@ def depthFirstSearch(problem):
         closedlist.append(currentnode[0])
         if problem.isGoalState(currentnode[0]):
             break
-        print "TEST: ", currentnode
         successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
         "successors = [node for node in problem.getSuccessors(currentnode[0]) if (node not in closedlist)]"
-        print successors
         del openlist[0]
         if successors == []:
             for node in problem.getSuccessors(currentnode[0]):
                 succs = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
-        print successors
-        del openlist[0]
         if successors == []:
-            openlist.append(path[len(path)-2])
-            path = path[:1]
-            "Hier dingen uit path verwijderen."
+            openlist = [path[len(path)-2]] + openlist
+            del path[-2:]
             continue
         "We want to place the successors at the head of the openlist so that if the left most node leads to a deaden, it tries the next successor before travelling up the tree again."
         openlist = successors + openlist
-    print path
-    actionlist = [node[1] for node in path]
-    util.raiseNotDefined()
+    actionlist = [node[1] for node in path[1:]]
+    print actionlist
     return actionlist
 
 def breadthFirstSearch(problem):
