@@ -90,7 +90,7 @@ def depthFirstSearch(problem):
     "list of nodes seen."
     openlist = []
     "list of nodes iterated. (Maybe we don't need this)"
-    closedlist = [(0,0)]
+    closedlist = []
     "the list of nodes that constitutes our path."
     lijst = []
     "We slaan naast de positie, actie, cost ook nog het pad op in de vorm (currentnode, action). Dit is nog niet relevant voor de startstate."
@@ -126,33 +126,68 @@ def breadthFirstSearch(problem):
     start = problem.getStartState()
     openlist = []
     closedlist = []
-    paths = []
-    openlist.append((start,None,0))
-    goalpath = []
-    paths.append([(start,None,0)])
+    lijst = []
+    openlist.append(((start,None,0),(0,0)))
+    openlist2 = [start]
     while len(openlist) > 0:
-        for path in paths:
-            currentnode = path[-1]
-            closedlist.append(currentnode[0])
-            if problem.isGoalState(currentnode[0]):
-                goalpath = path[1:]
-                break
-            successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
-            openlist = [x for x in openlist if x != currentnode]
-            if successors == []:
-                paths = [p for p in paths if p != path]
-                continue
-            openlist = openlist + successors
-            for suc in successors:
-                paths.append(path + [suc])
-            paths = [p for p in paths if p != path]
-        if len(goalpath) > 0:
+        currentnode = openlist[0][0]
+        lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
+        closedlist.append(currentnode[0])
+        if problem.isGoalState(currentnode[0]):
             break
-    actionlist = [node[1] for node in goalpath]
+        successors = filter(lambda x: x[0] not in closedlist and x[0] not in openlist2, problem.getSuccessors(currentnode[0]))
+        succ = [(x,currentnode[0]) for x in successors]
+        del openlist[0]
+        if successors == []:
+            continue
+        openlist = openlist + succ
+        for elem in successors:
+            openlist2.append(elem[0])
+    actionlist = []
+    pathnode = lijst[-1]
+    while True:
+        if pathnode[0] == start:
+            break
+        actionlist = [pathnode[2]] + actionlist
+        for elem in lijst:
+            if elem[0] == pathnode[1]:
+                pathnode = elem
     return actionlist
 
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
+    "Search the node of least total cost first."
+    start = problem.getStartState()
+    openlist = []
+    closedlist = []
+    lijst = []
+    openlist.append(((start,None,0),(0,0)))
+    while len(openlist) > 0:
+        currentnode = openlist[0][0]
+        lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
+        closedlist.append(currentnode[0])
+        if problem.isGoalState(currentnode[0]):
+            break
+        successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
+        succ = [(x,currentnode[0]) for x in successors]
+        del openlist[0]
+        if successors == []:
+            continue
+        openlist = succ[::-1] + openlist
+    actionlist = []
+    pathnode = lijst[-1]
+    while True:
+        if pathnode[0] == start:
+            break
+        actionlist = [pathnode[2]] + actionlist
+        for elem in lijst:
+            if elem[0] == pathnode[1]:
+                pathnode = elem
+    return actionlist
+
+
+"""
+def uniformCostSearch(problem):
+   "Search the node of least total cost first."
     start = problem.getStartState()
     openlist = []
     openlist.append((start,None,0))
@@ -172,6 +207,7 @@ def uniformCostSearch(problem):
         openlist = succ + openlist
         break
     util.raiseNotDefined()
+"""
 
 def nullHeuristic(state, problem=None):
     """
