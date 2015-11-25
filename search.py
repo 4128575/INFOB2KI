@@ -90,11 +90,75 @@ def depthFirstSearch(problem):
     "list of nodes seen."
     openlist = []
     "list of nodes iterated. (Maybe we don't need this)"
-    closedlist = []
+    closedlist = [(0,0)]
     "the list of nodes that constitutes our path."
-    path = []
-    openlist.append((start,None,0))
+    lijst = []
+    "We slaan naast de positie, actie, cost ook nog het pad op in de vorm (currentnode, action). Dit is nog niet relevant voor de startstate."
+    openlist.append(((start,None,0),(0,0)))
     "Code gaat van triples uit."
+    while len(openlist) > 0:
+        currentnode = openlist[0][0]
+        lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
+        closedlist.append(currentnode[0])
+        if problem.isGoalState(currentnode[0]):
+            break
+        successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
+        succ = [(x,currentnode[0]) for x in successors]
+        "successors = [node for node in problem.getSuccessors(currentnode[0]) if (node not in closedlist)]"
+        del openlist[0]
+        if successors == []:
+            continue
+        "We want to place the successors at the head of the openlist so that if the left most node leads to a deadend, it tries the next successor before travelling up the tree again."
+        openlist = succ[::-1] + openlist
+    actionlist = []
+    pathnode = lijst[-1]
+    while True:
+        if pathnode[0] == start:
+            break
+        actionlist = [pathnode[2]] + actionlist
+        for elem in lijst:
+            if elem[0] == pathnode[1]:
+                pathnode = elem
+    return actionlist
+
+def breadthFirstSearch(problem):
+    """Search the shallowest nodes in the search tree first."""
+    start = problem.getStartState()
+    openlist = []
+    closedlist = []
+    paths = []
+    openlist.append((start,None,0))
+    goalpath = []
+    paths.append([(start,None,0)])
+    while len(openlist) > 0:
+        for path in paths:
+            currentnode = path[-1]
+            closedlist.append(currentnode[0])
+            if problem.isGoalState(currentnode[0]):
+                goalpath = path[1:]
+                break
+            successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
+            openlist = [x for x in openlist if x != currentnode]
+            if successors == []:
+                paths = [p for p in paths if p != path]
+                continue
+            openlist = openlist + successors
+            for suc in successors:
+                paths.append(path + [suc])
+            paths = [p for p in paths if p != path]
+        if len(goalpath) > 0:
+            break
+    actionlist = [node[1] for node in goalpath]
+    return actionlist
+
+def uniformCostSearch(problem):
+    """Search the node of least total cost first."""
+    start = problem.getStartState()
+    openlist = []
+    openlist.append((start,None,0))
+    closedlist = []
+    path = []
+    path.append((start,None,0))
     while len(openlist) > 0:
         currentnode = openlist[0]
         path.append(currentnode)
@@ -102,29 +166,11 @@ def depthFirstSearch(problem):
         if problem.isGoalState(currentnode[0]):
             break
         successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
-        "successors = [node for node in problem.getSuccessors(currentnode[0]) if (node not in closedlist)]"
         del openlist[0]
-        if successors == []:
-            for node in problem.getSuccessors(currentnode[0]):
-                succs = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
-        if successors == []:
-            openlist = [path[len(path)-2]] + openlist
-            del path[-2:]
-            continue
-        "We want to place the successors at the head of the openlist so that if the left most node leads to a deaden, it tries the next successor before travelling up the tree again."
-        openlist = successors[::-1] + openlist
-    actionlist = [node[1] for node in path[1:]]
-    print len(actionlist)
-    return actionlist
-
-def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-
-def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
+        succ = sorted(successors, key=lambda x: x[2])
+        print succ
+        openlist = succ + openlist
+        break
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
