@@ -206,7 +206,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     start = problem.getStartState()
     closedlist = []
     openlist = [start]
-    camefrom = {}
+    camefrom = {start: None}
     gscore = {start: 0}
     fscore = {start: gscore[start] + heuristic(start,problem)}
     while len(openlist) > 0:
@@ -227,11 +227,21 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             tentativegscore = gscore[currentnode] + elem[2]
             if elem[0] not in openlist:
                 openlist.append(elem[0])
+                gscore[elem[0]] = float("inf")
+                fscore[elem[0]] = float("inf")
             else:
                 if tentativegscore >= gscore[elem[0]]:
                     continue
-        
-    util.raiseNotDefined()
+            camefrom[elem[0]] = (currentnode,elem[1])
+            gscore[elem[0]] = tentativegscore
+            fscore[elem[0]] = gscore[elem[0]] + heuristic(elem[0], problem)
+    path = []
+    node = goalnode
+    while camefrom[node] != None:
+        path = [camefrom[node]] + path
+        node = camefrom[node][0]
+    actionlist = [x[1] for x in path]
+    return actionlist
 
 
 # Abbreviations
