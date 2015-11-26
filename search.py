@@ -154,60 +154,45 @@ def breadthFirstSearch(problem):
                 pathnode = elem
     return actionlist
 
-def uniformCostSearch(problem):
-    "Search the node of least total cost first."
-    start = problem.getStartState()
-    openlist = []
-    closedlist = []
-    lijst = []
-    openlist.append(((start,None,0),(0,0)))
-    while len(openlist) > 0:
-        currentnode = openlist[0][0]
-        lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
-        closedlist.append(currentnode[0])
-        if problem.isGoalState(currentnode[0]):
-            break
-        successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
-        succ = [(x,currentnode[0]) for x in successors]
-        del openlist[0]
-        if successors == []:
-            continue
-        openlist = succ[::-1] + openlist
-    actionlist = []
-    pathnode = lijst[-1]
-    while True:
-        if pathnode[0] == start:
-            break
-        actionlist = [pathnode[2]] + actionlist
-        for elem in lijst:
-            if elem[0] == pathnode[1]:
-                pathnode = elem
-    return actionlist
 
-
-"""
 def uniformCostSearch(problem):
-   "Search the node of least total cost first."
     start = problem.getStartState()
-    openlist = []
-    openlist.append((start,None,0))
+    vertexlijst = [start]
     closedlist = []
+    distdict = {start: 0}
+    prevdict = {start: None}
+    while len(vertexlijst) > 0:
+        currentnode = vertexlijst[0]
+        for node in vertexlijst:
+            if distdict[node] < distdict[currentnode]:
+                currentnode = node
+        closedlist.append(currentnode)
+        if problem.isGoalState(currentnode):
+            goalnode = currentnode
+            break
+        successors = problem.getSuccessors(currentnode)
+        succs = filter(lambda x: x[0] not in closedlist, successors)
+        for elem in succs:
+            if elem[0] not in distdict.keys():
+                distdict[elem[0]] = float("inf")
+                prevdict[elem[0]] = None
+        vertexlijst = filter(lambda x: x != currentnode, vertexlijst)
+        vertexlijst = [x[0] for x in succs] + vertexlijst
+        for elem in successors:
+            if elem[0] not in vertexlijst:
+                continue
+            else:
+                altdist = distdict[currentnode] + elem[2]
+                if altdist < distdict[elem[0]]:
+                    distdict[elem[0]] = altdist
+                    prevdict[elem[0]] = (currentnode,elem[1])
     path = []
-    path.append((start,None,0))
-    while len(openlist) > 0:
-        currentnode = openlist[0]
-        path.append(currentnode)
-        closedlist.append(currentnode[0])
-        if problem.isGoalState(currentnode[0]):
-            break
-        successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
-        del openlist[0]
-        succ = sorted(successors, key=lambda x: x[2])
-        print succ
-        openlist = succ + openlist
-        break
-    util.raiseNotDefined()
-"""
+    node = goalnode
+    while prevdict[node] != None:
+        path = [prevdict[node]] + path
+        node = prevdict[node][0]
+    actionlist = [x[1] for x in path]
+    return actionlist
 
 def nullHeuristic(state, problem=None):
     """
@@ -218,7 +203,34 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
+    start = problem.getStartState()
+    closedlist = []
+    openlist = [start]
+    camefrom = {}
+    gscore = {start: 0}
+    fscore = {start: gscore[start] + heuristic(start,problem)}
+    while len(openlist) > 0:
+        currentnode = openlist[0]
+        for node in openlist:
+            if fscore[node] < fscore[currentnode]:
+                currentnode = node
+        if problem.isGoalState(currentnode):
+            goalnode = currentnode
+            break
+        openlist = filter(lambda x: x != currentnode, openlist)
+        closedlist.append(currentnode)
+        successors = problem.getSuccessors(currentnode)
+        succs = [x[0] for x in successors]
+        for elem in successors:
+            if elem[0] in closedlist:
+                continue
+            tentativegscore = gscore[currentnode] + elem[2]
+            if elem[0] not in openlist:
+                openlist.append(elem[0])
+            else:
+                if tentativegscore >= gscore[elem[0]]:
+                    continue
+        
     util.raiseNotDefined()
 
 
