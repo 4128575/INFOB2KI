@@ -280,7 +280,7 @@ class CornersProblem(search.SearchProblem):
         self.walls = startingGameState.getWalls()
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
-        self.corners = [(1,1), (1,top), (right, 1), (right, top)]
+        self.corners = ((1,1), (1,top), (right, 1), (right, top))
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
@@ -304,7 +304,7 @@ class CornersProblem(search.SearchProblem):
 
         If we have visitied all the corners, i.e. state[1] is the empty list, we return True.
         """
-        return filter(lambda x: x != (state[0],state[1]),state[2]) == []
+        return filter(lambda x: x != (state[0],state[1]),list(state[2])) == []
 
     def getSuccessors(self, state):
         """
@@ -333,7 +333,7 @@ class CornersProblem(search.SearchProblem):
                 nextState = (nextx, nexty)
                 cost = self.costFn(nextState)
                 successors.append( ( nextState, action, cost) )
-        unvisitedcorners = filter(lambda x: x != (state[0],state[1]),state[2])
+        unvisitedcorners = tuple(filter(lambda x: x != (state[0],state[1]),list(state[2])))
         succs = [((x[0][0],x[0][1],unvisitedcorners),x[1],x[2]) for x in successors]
         self._expanded += 1 # DO NOT CHANGE
         return succs
@@ -366,7 +366,7 @@ def cornersHeuristic(state, problem):
     admissible (as well as consistent).
     """
     position = (state[0],state[1])
-    corners = state[2] # These are the corner coordinates
+    corners = list(state[2]) # These are the corner coordinates
     distance = 0
     while corners != []:
         distcorner = sorted([(abs(position[0] - x[0]) + abs(position[1] - x[1]),x) for x in corners],key = lambda x: x[0])
