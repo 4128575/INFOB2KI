@@ -280,7 +280,7 @@ class CornersProblem(search.SearchProblem):
         self.walls = startingGameState.getWalls()
         self.startingPosition = startingGameState.getPacmanPosition()
         top, right = self.walls.height-2, self.walls.width-2
-        self.corners = ((1,1), (1,top), (right, 1), (right, top))
+        self.corners = [(1,1), (1,top), (right, 1), (right, top)]
         for corner in self.corners:
             if not startingGameState.hasFood(*corner):
                 print 'Warning: no food in corner ' + str(corner)
@@ -293,14 +293,18 @@ class CornersProblem(search.SearchProblem):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
+
+        A state is a tuple of the current position, action, cost and a list of corners we have not yet visitied.
         """
-        return self.startingPosition
+        return (self.startingPosition[0], self.startingPosition[1], self.corners)
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
+
+        If we have visitied all the corners, i.e. state[1] is the empty list, we return True.
         """
-        return state in self.corners
+        return filter(lambda x: x != (state[0],state[1]),state[2]) == []
 
     def getSuccessors(self, state):
         """
@@ -321,15 +325,18 @@ class CornersProblem(search.SearchProblem):
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
-            x,y = state
+            x = state[0]
+            y = state[1]
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
                 cost = self.costFn(nextState)
                 successors.append( ( nextState, action, cost) )
+        unvisitedcorners = filter(lambda x: x != (state[0],state[1]),state[2])
+        succs = [((x[0][0],x[0][1],unvisitedcorners),x[1],x[2]) for x in successors]
         self._expanded += 1 # DO NOT CHANGE
-        return successors
+        return succs
 
     def getCostOfActions(self, actions):
         """

@@ -128,21 +128,18 @@ def breadthFirstSearch(problem):
     closedlist = []
     lijst = []
     openlist.append(((start,None,0),(0,0)))
-    openlist2 = [start]
     while len(openlist) > 0:
         currentnode = openlist[0][0]
-        lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
         closedlist.append(currentnode[0])
+        lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
         if problem.isGoalState(currentnode[0]):
             break
-        successors = filter(lambda x: x[0] not in closedlist and x[0] not in openlist2, problem.getSuccessors(currentnode[0]))
+        successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
         succ = [(x,currentnode[0]) for x in successors]
-        del openlist[0]
+        openlist = filter(lambda x: x[0][0] != currentnode[0], openlist)
         if successors == []:
             continue
         openlist = openlist + succ
-        for elem in successors:
-            openlist2.append(elem[0])
     actionlist = []
     pathnode = lijst[-1]
     while True:
