@@ -464,10 +464,56 @@ def foodHeuristic(state, problem):
     value, try: problem.heuristicInfo['wallCount'] = problem.walls.count()
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
-    """
+"""
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodGridCoordinates = foodGrid.asList()[:]
+    distance = 0
+    while foodGridCoordinates != []:
+        distcorner = sorted([(abs(position[0] - x[0]) + abs(position[1] - x[1]),x) for x in foodGridCoordinates],key = lambda x: x[0])
+        distance = distance + distcorner[0][0]
+        foodGridCoordinates = filter(lambda x: x != distcorner[0][1], foodGridCoordinates)
+        position = distcorner[0][1]
+    return distance
+"""
+    foodGridCoordinates = [position] + foodGridCoordinates
+    if len(foodGridCoordinates) == 0:
+        return distance
+
+    #Find all the manhattan distances. We do this by creating a dictionary of dictionaries that allows us to lookup the list of all distances from a certain food node to all the other food nodes.
+    distdict = {}
+    for node in foodGridCoordinates:
+        dictfornode = {}
+        for othernode in foodGridCoordinates:
+            dictfornode[othernode] = abs(node[0]-othernode[0]) + abs(node[1] - othernode[1])
+        distdict[node] = dictfornode
+
+    #We create a dictionary of distances to the position for every food.    
+    lowestdistance = {}
+    for food in foodGridCoordinates:
+        lowestdistance[food] = distdict[position][food]
+
+    #We will need to keep track of which node is closest to each other node. For now we will set them all to position. A dictionary is most convenient.
+    closestnodes = {}
+    for food in foodGridCoordinates:
+        closestnodes[food] = position
+
+    #We grab the lowestcost node to the position and check what distances from this lowest node to any other (uncomputed) nodes is smaller than the distance to the player position. If it is smaller we change the distance and we set the lowestcost node as the closest. We remove the lowestcost node from the dictionary since it has been computed (this is the act of stepping towards it).
+    while lowestdistance != {}:
+        copyPosDis = lowestdistance.items()
+        copyPosDis = sorted(copyPosDis,key = lambda x: x[1])
+        lowestcostnode = copyPosDis[0][0]
+        helplist = [x[0] for x in copyPosDis]
+        for node in helplist:
+            if distdict[lowestcostnode][node] < lowestdistance[node]:
+                lowestdistance[node] = distdict[lowestcostnode][node]
+                closestnodes[node] = lowestcostnode
+        del lowestdistance[lowestcostnode]
+
+    #Now we compute the actual distance
+    for food in foodGridCoordinates:
+        distance += distance + distdict[food][closestnodes[food]]
+    return distance
+"""
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
@@ -532,7 +578,8 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-
+        print type(self.food)
+        print self.food
         "*** YOUR CODE HERE ***"
         util.raiseNotDefined()
 
