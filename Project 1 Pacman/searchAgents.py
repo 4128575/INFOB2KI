@@ -323,17 +323,24 @@ class CornersProblem(search.SearchProblem):
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
 
+        "initialize the list of successors as empty"
         successors = []
+        "iterate over the possible movement directions"
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            "get the position from the state"
             x = state[0]
             y = state[1]
+            "apply the change in position from the movement direction"
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
+            "append the move to the successors if you don't hit a wall"
             if not self.walls[nextx][nexty]:
                 nextState = (nextx, nexty)
                 cost = self.costFn(nextState)
                 successors.append( ( nextState, action, cost) )
+        "get the list containing the unvisited corners"
         unvisitedcorners = tuple(filter(lambda x: x != (state[0],state[1]),list(state[2])))
+        "create the final list of successors based on the initial list, by adding the list of unvisited corners to it"
         succs = [((x[0][0],x[0][1],unvisitedcorners),x[1],x[2]) for x in successors]
         self._expanded += 1 # DO NOT CHANGE
         return succs
@@ -364,14 +371,24 @@ def cornersHeuristic(state, problem):
     This function should always return a number that is a lower bound on the
     shortest path from the state to a goal of the problem; i.e.  it should be
     admissible (as well as consistent).
+
+    This implementation finds the manhattan distance to the closest corner and
+    adds this, and the manhattan distance required to find the other missing
+    corners together
     """
+    "extract the state object and initialize the expected distance to 0"
     position = (state[0],state[1])
     corners = list(state[2]) # These are the corner coordinates
     distance = 0
+    "iterate over all the corners"
     while corners != []:
+        "find and sort the distances to all corners you still need to visit"
         distcorner = sorted([(abs(position[0] - x[0]) + abs(position[1] - x[1]),x) for x in corners],key = lambda x: x[0])
+        "add the shortest distance to the current distance"
         distance = distance + distcorner[0][0]
+        "remove the corner you just 'visited' from the list of corners"
         corners = filter(lambda x: x != distcorner[0][1], corners)
+        "change position to the corner you just visited"
         position = distcorner[0][1]
     return distance
 
@@ -468,22 +485,28 @@ def foodHeuristic(state, problem):
     Our heuristic uses the supplied function mazeDistance rather than the manhattan distance to compute the
     distance to the farthest node. This greatly improves efficiency.
 """
+    "extract the state to initialize some variables"
     position, foodGrid = state
 
    #Our heuristic uses the supplied function mazeDistance rather than the manhattan distance to compute the
    #distance to the farthest node. This greatly improves efficiency.
 
+    "set the foodgrid to be used as a list and initialize the distance to 0"
     foodGridCoordinates = foodGrid.asList()
     distance = 0
 
+    "check if there is food"
     if len(foodGridCoordinates) == 0:
         return 0
 
+    "initialize highFoodDist to be the first element in the list of foods"
     highFoodDist = mazeDistance(position, foodGridCoordinates[0], problem.startingGameState)
+    "iterate over the foods to find the furthest food"
     for food in foodGridCoordinates:
         tempDist = mazeDistance(position, food, problem.startingGameState)
         if tempDist > highFoodDist:
             highFoodDist = tempDist
+    "take the highFoodDist as the distance to complete the maze and return it"
     distance = highFoodDist
 
     return distance
@@ -511,11 +534,13 @@ class ClosestDotSearchAgent(SearchAgent):
         gameState.
         """
         # Here are some useful elements of the startState
+        "initialize some variables"
         startPosition = gameState.getPacmanPosition()
         food = gameState.getFood()
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
+        "use breadthFirstSearch one AnyFoodSearchProblem to make it find the closest food dot"
         actionlist = search.breadthFirstSearch(problem)
         return actionlist
 
@@ -550,8 +575,10 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         The state is Pacman's position. Fill this in with a goal test that will
         complete the problem definition.
         """
+        "get the position and the list of food dots"
         x,y = state
         foodList = self.food.asList()
+        "check if the position also contains a food dot"
         if (x,y) in foodList:
             return True
         else:
