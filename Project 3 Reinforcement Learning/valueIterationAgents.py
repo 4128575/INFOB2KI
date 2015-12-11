@@ -1,4 +1,4 @@
-# valueIterationAgents.py
+﻿# valueIterationAgents.py
 # -----------------------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
@@ -12,7 +12,8 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
-import mdp, util
+import mdp
+import util
 
 from learningAgents import ValueEstimationAgent
 
@@ -25,7 +26,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         for a given number of iterations using the supplied
         discount factor.
     """
-    def __init__(self, mdp, discount = 0.9, iterations = 100):
+    def __init__(self, mdp, discount=0.9, iterations=100):
         """
           Your value iteration agent should take an mdp on
           construction, run the indicated number of iterations
@@ -43,8 +44,32 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.iterations = iterations
         self.values = util.Counter() # A Counter is a dict with default 0
 
-        # Write value iteration code here
-        "*** YOUR CODE HERE ***"
+
+        for i in range(0, self.iterations):
+            #import copy
+            newValues = util.Counter()
+            for state in self.mdp.getStates():  
+                if self.mdp.isTerminal(state):
+                    newValues[state] = 0
+                    continue
+                
+                maxActionValue = -1 * float('inf')
+                maxAction = None
+                possibleActions = self.mdp.getPossibleActions(state)
+                if not possibleActions:
+                    newValues[state] = 0
+
+                for action in possibleActions:
+                    actionSumSPrime = self.getQValue(state, action)
+                                
+                    #Find the maximum action
+                    if maxActionValue < actionSumSPrime:
+                        maxAction = action
+                        maxActionValue = actionSumSPrime
+
+                v_kPlus1 = maxActionValue
+                newValues[state] = v_kPlus1
+            self.values = newValues
 
 
     def getValue(self, state):
@@ -60,7 +85,15 @@ class ValueIterationAgent(ValueEstimationAgent):
           value function stored in self.values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actionSumSPrime = 0
+        for transition in self.mdp.getTransitionStatesAndProbs(state, action):
+            TransitionProb = transition[1]
+            statePrime = transition[0]
+            gamma = self.discount
+            reward = self.mdp.getReward(state, action, statePrime) 
+            actionSumSPrime += TransitionProb * (reward + (gamma * self.values[statePrime]))
+
+        return actionSumSPrime
 
     def computeActionFromValues(self, state):
         """
@@ -72,7 +105,22 @@ class ValueIterationAgent(ValueEstimationAgent):
           terminal state, you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        maxActionValue = -1*float('inf')
+        maxAction = None
+        possibleActions = self.mdp.getPossibleActions(state)
+
+        if not possibleActions or self.mdp.isTerminal(state):
+            return None
+
+        for action in possibleActions:
+            actionSumSPrime = self.getQValue(state, action)
+                        
+            #Find the maximum action
+            if maxActionValue < actionSumSPrime:
+                maxAction = action
+                maxActionValue = actionSumSPrime
+
+        return maxAction
 
     def getPolicy(self, state):
         return self.computeActionFromValues(state)
