@@ -1,4 +1,4 @@
-# analysis.py
+﻿# analysis.py
 # -----------
 # Licensing Information:  You are free to use or extend these projects for
 # educational purposes provided that (1) you do not distribute or publish
@@ -32,7 +32,7 @@ def question3a():
     # If not possible, return 'NOT POSSIBLE'
 
 def question3b():
-    answerDiscount = 0.2
+    answerDiscount = 0.3
     answerNoise = 0.2
     answerLivingReward = 0.0
     return answerDiscount, answerNoise, answerLivingReward
