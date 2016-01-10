@@ -55,14 +55,14 @@ class ValueIterationAgent(ValueEstimationAgent):
                 
                 maxActionValue = -1 * float('inf')
                 maxAction = None
-                possibleActions = self.mdp.getPossibleActions(state)
-                if not possibleActions:
+                potentialActions = self.mdp.getPossibleActions(state)
+                if not potentialActions:
                     newValues[state] = 0
 
-                for action in possibleActions:
+                for action in potentialActions:
                     actionSumSPrime = self.getQValue(state, action)
                                 
-                    #Find the maximum action
+                    #Find maximum action
                     if maxActionValue < actionSumSPrime:
                         maxAction = action
                         maxActionValue = actionSumSPrime
@@ -104,7 +104,6 @@ class ValueIterationAgent(ValueEstimationAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return None.
         """
-        "*** YOUR CODE HERE ***"
         maxActionValue = -1*float('inf')
         maxAction = None
         possibleActions = self.mdp.getPossibleActions(state)
@@ -115,7 +114,7 @@ class ValueIterationAgent(ValueEstimationAgent):
         for action in possibleActions:
             actionSumSPrime = self.getQValue(state, action)
                         
-            #Find the maximum action
+            #Find maximum action
             if maxActionValue < actionSumSPrime:
                 maxAction = action
                 maxActionValue = actionSumSPrime

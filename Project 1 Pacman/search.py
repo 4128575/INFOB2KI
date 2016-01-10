@@ -123,23 +123,31 @@ def depthFirstSearch(problem):
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
+    "Initialize the start of the search"
     start = problem.getStartState()
     openlist = []
     closedlist = []
     lijst = []
     openlist.append(((start,None,0),(0,0)))
+    "keep doing the following until you are done searching"
     while len(openlist) > 0:
+        "get the first node that still needs to be processed"
         currentnode = openlist[0][0]
+        "indicate that the node has been processed"
         closedlist.append(currentnode[0])
+        "append the newest node to the list that tracks the possible paths"
         lijst.append((currentnode[0],openlist[0][1],currentnode[1]))
+        "check if we have reached the goal"
         if problem.isGoalState(currentnode[0]):
             break
+        "add the valid successors to the openlist"
         successors = filter(lambda x: x[0] not in closedlist, problem.getSuccessors(currentnode[0]))
         succ = [(x,currentnode[0]) for x in successors]
         openlist = filter(lambda x: x[0][0] != currentnode[0], openlist)
         if successors == []:
             continue
         openlist = openlist + succ
+    "build the path from the information stored in lijst"
     actionlist = []
     pathnode = lijst[-1]
     while True:
@@ -153,28 +161,40 @@ def breadthFirstSearch(problem):
 
 
 def uniformCostSearch(problem):
+    "initialize the initial variables"
     start = problem.getStartState()
     vertexlijst = [start]
     closedlist = []
+    "a dictionary containing the shortest distances required to get to a node using the shortest discovered path"
     distdict = {start: 0}
+    "a dictionary containing the previous node on the shortest discovered path to a certain node"
     prevdict = {start: None}
+    "keep doing this until you are done searching"
     while len(vertexlijst) > 0:
+        "grab the first node that needs to be explored"
         currentnode = vertexlijst[0]
+        "find the node that has the lowest path cost by comparing them to currentnode and replacing that variable when necessary"
         for node in vertexlijst:
             if distdict[node] < distdict[currentnode]:
                 currentnode = node
+        "indicate you are done with this node"
         closedlist.append(currentnode)
+        "check if you are done"
         if problem.isGoalState(currentnode):
             goalnode = currentnode
             break
+        "find all possible successors and filter out those that are already explored"
         successors = problem.getSuccessors(currentnode)
         succs = filter(lambda x: x[0] not in closedlist, successors)
+        "set a default value for this node in the dictionaries if it's not in there yet"
         for elem in succs:
             if elem[0] not in distdict.keys():
                 distdict[elem[0]] = float("inf")
                 prevdict[elem[0]] = None
+        "filter the vertexlijst so it contains only the necessary nodes"
         vertexlijst = filter(lambda x: x != currentnode, vertexlijst)
         vertexlijst = [x[0] for x in succs] + vertexlijst
+        "add the correct values based on the possible successor nodes to the appropriate list and dictionaries"
         for elem in successors:
             if elem[0] not in vertexlijst:
                 continue
@@ -183,6 +203,7 @@ def uniformCostSearch(problem):
                 if altdist < distdict[elem[0]]:
                     distdict[elem[0]] = altdist
                     prevdict[elem[0]] = (currentnode,elem[1])
+    "build the path"
     path = []
     node = goalnode
     while prevdict[node] != None:
@@ -200,28 +221,40 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
+    "initialize the variables"
     start = problem.getStartState()
     closedlist = []
     openlist = [start]
+    "indicates the previous node on the path to this one"
     camefrom = {start: None}
+    "the cost to get to this node"
     gscore = {start: 0}
+    "the predicted cost to get to the final node using the gscore and the heuristic"
     fscore = {start: gscore[start] + heuristic(start,problem)}
+    "do this until you are done searching"
     while len(openlist) > 0:
+        "find the next node to explore"
         currentnode = openlist[0]
         for node in openlist:
             if fscore[node] < fscore[currentnode]:
                 currentnode = node
+        "check if you are done"
         if problem.isGoalState(currentnode):
             goalnode = currentnode
             break
+        "add and remove the current node from the appropriate lists"
         openlist = filter(lambda x: x != currentnode, openlist)
         closedlist.append(currentnode)
+        "get the successors"
         successors = problem.getSuccessors(currentnode)
         succs = [x[0] for x in successors]
+        "score the new successor nodes"
         for elem in successors:
             if elem[0] in closedlist:
                 continue
+            "add the path cost to this node to the previous path cost"
             tentativegscore = gscore[currentnode] + elem[2]
+            "add the new node to openlist if not already there and set starting values for it in gscore and fscore"
             if elem[0] not in openlist:
                 openlist.append(elem[0])
                 gscore[elem[0]] = float("inf")
@@ -229,9 +262,11 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             else:
                 if tentativegscore >= gscore[elem[0]]:
                     continue
+            "set the appropriate values in the dictionaries containing this node"
             camefrom[elem[0]] = (currentnode,elem[1])
             gscore[elem[0]] = tentativegscore
             fscore[elem[0]] = gscore[elem[0]] + heuristic(elem[0], problem)
+    "build the path from the camefrom dictionary"
     path = []
     node = goalnode
     while camefrom[node] != None:
