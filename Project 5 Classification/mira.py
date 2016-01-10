@@ -60,8 +60,67 @@ class MiraClassifier:
         datum is a counter from features to values for those features
         representing a vector of values.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        tempWeights = util.Counter()
+        """The implementation is fairly similar to the one in perceptron.py. We have to loop through the
+        iterations ourselves and the weight updating is different."""
+        for c in Cgrid:
+            tempWeights[c] = self.weights.copy()
+            for i in range(self.max_iterations):
+                for i in range(len(trainingData)):
+                    "Initiation"
+                    currentDatum = trainingData[i]
+                    referenceLabel = trainingLabels[i]
+                    currentScore = util.Counter()
+
+                    "We calculate the scores similarly to perceptron.py."
+                    for label in self.legalLabels:
+                        currentScore[label] = currentDatum * tempWeights[c][label]
+
+                    "We pick the best score."
+                    currentLabel = currentScore.argMax()
+
+                    "If the instance is not correct, we update the weights via the MIRA method."
+                    if currentLabel != referenceLabel:
+                        tempDatum = currentDatum.copy()
+                        for datum in tempDatum:
+                            tempDatum[datum] = tempDatum[datum] * tempDatum[datum]
+
+                        "We calculate tau as prescribed on the Berkeley site."
+                        tempTau = ((tempWeights[c][currentLabel] - tempWeights[c][referenceLabel]) * currentDatum + 1.0) / (2 * tempDatum.totalCount())
+                        tau = min(c, tempTau)
+                        tempDatum2 = currentDatum.copy()
+                        for k in tempDatum2:
+                            tempDatum2[k] = tempDatum2[k] * tau
+
+                        "We update the weights."
+                        tempWeights[c][currentLabel] = tempWeights[c][currentLabel] - tempDatum2
+                        tempWeights[c][referenceLabel] = tempWeights[c][referenceLabel] + tempDatum2
+
+        "Now we have to find the best C value. First we define the best C and the accuracy."
+        cValue = Cgrid[0]
+        accuracy = 0
+        for c in Cgrid:
+            correctGuesses = 0
+
+            "Since the classify method uses self.weights we need to set it to tempWeights here."
+            self.weights = tempWeights[c]
+            guessList = self.classify(validationData)
+            validationIndex = 0
+            for guess in guessList:
+                if guess == validationLabels[validationIndex]:
+                    correctGuesses += 1
+                validationIndex += 1
+
+            "We determine the accuracy for this particular C value."
+            tempAcc = correctGuesses / len(validationData)
+            if tempAcc > accuracy:
+                accuracy = tempAcc
+                cValue = c
+            if tempAcc == accuracy:
+                cValue = min(cValue, c)
+
+        self.weights = tempWeights[cValue]
 
     def classify(self, data ):
         """
