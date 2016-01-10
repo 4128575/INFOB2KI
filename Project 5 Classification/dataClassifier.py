@@ -144,17 +144,40 @@ def enhancedPacmanFeatures(state, action):
     For each state, this function is called with each legal action.
     It should return a counter with { <feature name> : <feature value>, ... }
     """
+
     features = util.Counter()
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
-    return features
 
+    """
+    We have made three features:
+        The number of food left useful for the FoodAgent and ContestAgent)
+        The distance to the nearest food (also useful for fFoodAgent and ContestAgent)
+        The distance to the nearest ghost (useful for SuicideAgent and ContestAgent)
+    """
 
-def contestFeatureExtractorDigit(datum):
-    """
-    Specify features to use for the minicontest
-    """
-    features =  basicFeatureExtractorDigit(datum)
+    state = state.generateSuccessor(0, action)
+    pacmanLocation = state.getPacmanPosition()
+
+    "The feature that keeps track of the remaining food."
+    features['numFoodRemain'] = state.getNumFood()
+
+    "We find the closest food position with the Manhattan distance. We look at the square of the distance."
+    foodList = state.getFood().asList()
+    nearestFood = 0
+    if foodList:
+        nearestFood = min([util.manhattanDistance(pacmanLocation, food) for food in foodList])
+    #if nearestFood > 0:
+    #    nearestFood = 10.0/nearestFood
+    features['nearestFoodDistance'] = nearestFood**2
+
+    "We get the ghost locations and find the closest one with the manhattan distance."
+    ghostList = state.getGhostPositions()
+    nearestGhost = 0
+    if ghostList:
+        nearestGhost = min(util.manhattanDistance(loc, pacmanLocation) for loc in ghostList)
+    #if nearestGhost > 0:
+    #    nearestGhost = 10.0/nearestGhost
+    features['nearestGhostDistance'] = nearestGhost
+
     return features
 
 def enhancedFeatureExtractorFace(datum):
