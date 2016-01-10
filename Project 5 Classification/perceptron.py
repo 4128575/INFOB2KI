@@ -54,8 +54,22 @@ class PerceptronClassifier:
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
-                "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                "Initiation"
+                currentDatum = trainingData[i]
+                referenceLabel = trainingLabels[i]
+                currentScore = util.Counter()
+
+                "We calculate the scores in the way described on the Berkeley site."
+                for label in self.legalLabels:
+                    currentScore[label] = currentDatum * self.weights[label]
+
+                "We pick the best score."
+                currentLabel = currentScore.argMax()
+
+                "If the instance is not correct we update the weights as prescribed on the Berkeley site."
+                if currentLabel != referenceLabel:
+                    self.weights[currentLabel] = self.weights[currentLabel] - currentDatum
+                    self.weights[referenceLabel] = self.weights[referenceLabel] + currentDatum
 
     def classify(self, data ):
         """
