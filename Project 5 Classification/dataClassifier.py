@@ -73,16 +73,38 @@ def enhancedFeatureExtractorDigit(datum):
 
     ## DESCRIBE YOUR ENHANCED FEATURES HERE...
 
+    We divide the grid into halves (vertically) and keep track which has the most pixels.
+
+    If the i-th line has a hole we return 1, else 0.
     ##
     """
     features =  basicFeatureExtractorDigit(datum)
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pixels = datum.getPixels()
 
+    "We do the same for left and right halves."
+    halfWidth = DIGIT_DATUM_WIDTH /2
+    leftPixels = [pixels[r][c] > 0 for r in xrange(DIGIT_DATUM_HEIGHT) for c in xrange(halfWidth)]
+    rightPixels = [pixels[r][c] > 0 for r in xrange(DIGIT_DATUM_HEIGHT) 
+            for c in xrange(halfWidth, DIGIT_DATUM_WIDTH)]
+    horizontal = sum(leftPixels) > sum(rightPixels)
+    features['horizontal'] = horizontal
+
+    for vert in range(DIGIT_DATUM_HEIGHT):
+        "We do the holes."
+        boolPixels = [bool(datum.getPixel(vert, hor)) for hor in xrange(DIGIT_DATUM_WIDTH)]
+        numPixels = sum(boolPixels)
+        "If there are pixels, we find the position of the first one on the right and left sides."
+        if numPixels > 0:
+            rightEdge = boolPixels.index(True)
+            leftEdge = ((DIGIT_DATUM_WIDTH-1)-boolPixels[::-1].index(True)) 
+            width = leftEdge - rightEdge
+        else:
+            width = 0
+        features['hole'+str(vert)] = width + (width>1) > numPixels
+        for i in range(4):
+            features[str(i)+'hole'+str(vert)] = features['hole'+str(vert)]
     return features
-
-
 
 def basicFeatureExtractorPacman(state):
     """
@@ -166,16 +188,16 @@ def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
 
     # Put any code here...
     # Example of use:
-    # for i in range(len(guesses)):
-    #     prediction = guesses[i]
-    #     truth = testLabels[i]
-    #     if (prediction != truth):
-    #         print "==================================="
-    #         print "Mistake on example %d" % i
-    #         print "Predicted %d; truth is %d" % (prediction, truth)
-    #         print "Image: "
-    #         print rawTestData[i]
-    #         break
+    for i in range(len(guesses)):
+        prediction = guesses[i]
+        truth = testLabels[i]
+        if (prediction != truth):
+            print "==================================="
+            print "Mistake on example %d" % i
+            print "Predicted %d; truth is %d" % (prediction, truth)
+            print "Image: "
+            print rawTestData[i]
+            break
 
 
 ## =====================
