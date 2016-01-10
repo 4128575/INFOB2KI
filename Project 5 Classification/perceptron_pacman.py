@@ -49,5 +49,10 @@ class PerceptronClassifierPacman(PerceptronClassifier):
         for iteration in range(self.max_iterations):
             print "Starting iteration ", iteration, "..."
             for i in range(len(trainingData)):
-                "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                currentDatum = trainingData[i]
+                referenceLabel = trainingLabels[i]
+                guess = self.classify([currentDatum])[0]
+                if guess != referenceLabel:
+                    self.weights += currentDatum[0][referenceLabel]
+                    self.weights -= currentDatum[0][guess]
+
