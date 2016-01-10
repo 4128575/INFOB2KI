@@ -93,7 +93,16 @@ class PerceptronClassifier:
         """
         featuresWeights = []
 
-        "*** YOUR CODE HERE ***"
+        """We initialize a temporary variable weights. Then we get all the feature weights, sort them 
+        and delete all but the first 100."""
+        tempWeights = util.Counter()
+        for feature in self.features:
+            tempWeights[feature] = self.weights[label][feature]
+        featuresWeights = tempWeights.sortedKeys()
+        del featuresWeights[100:]
+        return featuresWeights
+
+
         util.raiseNotDefined()
 
         return featuresWeights
